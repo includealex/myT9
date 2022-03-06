@@ -2,6 +2,7 @@
 #define RBTREE_INCLUDES_REDBLACK_HPP
 
 #include <cstdlib>
+#include <vector>
 
 template <class T>
 struct NodeT {
@@ -45,10 +46,14 @@ class RBTree {
   bool operator==(const RBTree& other) const;
   bool operator!=(const RBTree& other) const;
 
+  T find_most_frequent() const;
+
  private:
   size_t size_;
   NodeT<T>* root_;
 
+
+  std::vector<NodeT<T>*> inorder() const;
   void delete_tree(NodeT<T>* ptr);
   NodeT<T>* copy_tree(const NodeT<T>& other, const NodeT<T>* parent);
   NodeT<T>* insert(const T& rhs);

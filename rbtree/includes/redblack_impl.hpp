@@ -3,7 +3,10 @@
 
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
+#include "../../Stack/Stack/includes/Stack.h"
+#include "../../Stack/Stack/includes/Stack_impl.h"
 #include "redblack.hpp"
 
 #define RED true
@@ -178,7 +181,7 @@ void RBTree<T>::rotate_right(NodeT<T>* n) {
 
 template <class T>
 NodeT<T>* RBTree<T>::insert(const T& rhs) {
-  auto cur = new NodeT<T>;
+  auto cur = new NodeT<T>();
 
   cur->data_ = rhs;
   cur->color_ = RED;
@@ -188,6 +191,7 @@ NodeT<T>* RBTree<T>::insert(const T& rhs) {
     root_ = cur;
     cur->parent_ = nullptr;
     ++size_;
+    ++cur->frequency_;
     return cur;
   }
 
@@ -209,10 +213,13 @@ NodeT<T>* RBTree<T>::insert(const T& rhs) {
     if (mind->data_ < rhs) {
       if (mind->right_) {
         mind = mind->right_;
-      } else {
+      }
+
+      else {
         mind->right_ = cur;
         cur->parent_ = mind;
         ++size_;
+        ++cur->frequency_;
         return cur;
       }
     }
@@ -226,6 +233,7 @@ NodeT<T>* RBTree<T>::insert(const T& rhs) {
         mind->left_ = cur;
         cur->parent_ = mind;
         ++size_;
+        ++cur->frequency_;
         return cur;
       }
     }
@@ -373,7 +381,7 @@ bool RBTree<T>::search(const T& rhs) {
 
 template <class T>
 NodeT<T>* RBTree<T>::copy_tree(const NodeT<T>& other, const NodeT<T>* parent) {
-  auto res = new NodeT<T>;
+  auto res = new NodeT<T>();
   res->color_ = other.color_;
   res->data_ = other.data_;
   res->parent_ = parent;
@@ -411,35 +419,79 @@ RBTree<T>& RBTree<T>::operator=(const RBTree&& other) {
 
 template <class T>
 bool RBTree<T>::operator==(const RBTree<T>& other) const {
-  if (size_ != other.size_)
-    return false;
-
   if (this == &other)
     return true;
+
+  if (size_ != other.size_)
+    return false;
 
   return checkequality(root_, other.root_);
 }
 
 template <class T>
 bool RBTree<T>::checkequality(const NodeT<T>* froot, const NodeT<T>* sroot) const {
-  if(froot == nullptr || sroot == nullptr)
+  if (froot == nullptr || sroot == nullptr)
     return (froot == nullptr && sroot == nullptr);
 
-  if(froot->data_ != sroot->data_)
+  if (froot->frequency_ != sroot->frequency_)
     return false;
 
-  if(froot->color_ != sroot->color_)
+  if (froot->data_ != sroot->data_)
     return false;
 
-  checkequality(froot->left_, sroot->left_);
-  checkequality(froot->right_, sroot->right_);
+  if (froot->color_ != sroot->color_)
+    return false;
 
-  return true;  
+  return (checkequality(froot->left_, sroot->left_) && checkequality(froot->right_, sroot->right_));
 }
 
 template <class T>
 bool RBTree<T>::operator!=(const RBTree<T>& other) const {
   return !(*this == other);
+}
+
+template <class T>
+std::vector<NodeT<T>*> RBTree<T>::inorder() const {
+  Stack<NodeT<T>*> s;
+  auto cur = root_;
+  std::vector<NodeT<T>*> resarr;
+
+  while(true){
+    while(cur != nullptr) {
+      s.push(cur);
+      cur = cur->left_;
+    }
+
+    if(cur == nullptr && !s.is_empty()) {
+      auto mind = s.top();
+      resarr.push_back(mind);
+      cur = mind->right_;
+      s.pop();
+    }
+
+    if(cur == nullptr && s.is_empty()) {
+      break;
+    }
+  }
+
+  return resarr;
+}
+
+
+template <class T>
+T RBTree<T>::find_most_frequent() const {
+  auto res = inorder();
+  size_t fr = 0;
+  T ans;
+
+  for(auto n : res) {
+    if(n->frequency_ > fr) {
+      fr = n->frequency_;
+      ans = n->data_;
+    }
+  }
+
+  return ans;
 }
 
 #endif  // RBTREE_INCLUDES_REDBLACK_IMPL_HPP
