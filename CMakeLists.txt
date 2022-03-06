@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16.3)
 project(myT9)
 
 add_subdirectory(rbtree)
+add_subdirectory(Stack)
 
 file(GLOB_RECURSE ALL_CXX_SOURCE_FILES *.cpp *.hpp)
 
