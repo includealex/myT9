@@ -114,6 +114,19 @@ TEST(RBTreeTest, MostFrequent) {
   ASSERT_EQ(first.find_most_frequent(), val);
 }
 
+TEST(RBTreeTest, MoveConstructor) {
+  RBTree<int> first;
+  RBTree<int> second;
+
+  for(size_t i = 0; i < nTests; ++i) {
+    first.add(i);
+  }
+
+  second = std::move(first);
+
+  ASSERT_EQ(nTests, second.getsize());
+}
+
 int main(int argc, char* argv[]) {
   srand(time(nullptr));
   ::testing::InitGoogleTest(&argc, argv);
