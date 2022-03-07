@@ -41,7 +41,7 @@ class RBTree {
   bool search(const T& rhs);
 
   RBTree<T>& operator=(const RBTree& other);
-  RBTree<T>& operator=(const RBTree&& other);
+  RBTree<T>& operator=(RBTree&& other);
 
   bool operator==(const RBTree& other) const;
   bool operator!=(const RBTree& other) const;

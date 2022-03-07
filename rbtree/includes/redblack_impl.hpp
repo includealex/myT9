@@ -71,6 +71,7 @@ NodeT<T>* RBTree<T>::uncle(NodeT<T>* ptr) {
 
 template <class T>
 RBTree<T>::RBTree() {
+  root_ = nullptr;
   size_ = 0;
 }
 
@@ -91,8 +92,12 @@ void RBTree<T>::delete_tree(NodeT<T>* ptr) {
   if (!ptr)
     return;
 
-  delete_tree(ptr->left_);
-  delete_tree(ptr->right_);
+  if(ptr->left_)
+    delete_tree(ptr->left_);
+
+  if(ptr->right_)
+    delete_tree(ptr->right_);
+
   delete ptr;
 }
 
@@ -404,7 +409,7 @@ RBTree<T>& RBTree<T>::operator=(const RBTree& other) {
 }
 
 template <class T>
-RBTree<T>& RBTree<T>::operator=(const RBTree&& other) {
+RBTree<T>& RBTree<T>::operator=(RBTree&& other) {
   if (this != &other) {
     delete_tree(root_);
     size_ = other.size_;
