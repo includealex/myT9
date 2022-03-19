@@ -1,4 +1,4 @@
-#include "../includes/redblack.hpp"
+#include "redblack.hpp"
 
 #include <gtest/gtest.h>
 
@@ -6,9 +6,37 @@
 #include <ctime>
 #include <iostream>
 
-#include "../includes/redblack_impl.hpp"
+#include "redblack_impl.hpp"
 
 static const size_t nTests = 1e5;
+
+TEST(NodeT, CopyConstructor) {
+  int val = rand() % nTests;
+
+  NodeT<int> first;
+  first.data_ = val;
+  NodeT<int> second;
+
+  int secval = rand() % nTests + nTests;
+  second.data_ = secval;
+  first.left_ = &second;
+
+  NodeT<int> third(first);
+
+  ASSERT_EQ(third.data_, val);
+  ASSERT_EQ(third.left_->data_, secval);
+}
+
+TEST(NodeT, MoveConstructor) {
+  int val = rand() % nTests;
+
+  NodeT<int> first;
+  first.data_ = val;
+
+  NodeT<int> second(std::move(first));
+
+  ASSERT_EQ(second.data_, val);
+}
 
 TEST(RBTreeTest, Crushtest) {
   RBTree<int> first;
@@ -96,7 +124,7 @@ TEST(RBTreeTest, MostFrequent) {
   RBTree<int> first;
   int val = rand() % nTests;
 
-  for(size_t i = 0; i < nTests; ++i) {
+  for (size_t i = 0; i < nTests; ++i) {
     first.add(i);
   }
 
@@ -106,25 +134,48 @@ TEST(RBTreeTest, MostFrequent) {
 
   int qval = rand() % nTests;
 
-  for(size_t i = 0; i < nTests; ++i) {
-	  first.add(val);
-	  first.add(qval);
+  for (size_t i = 0; i < nTests; ++i) {
+    first.add(val);
+    first.add(qval);
   }
 
   ASSERT_EQ(first.find_most_frequent(), val);
 }
 
-TEST(RBTreeTest, MoveConstructor) {
+TEST(RBTreeTest, CopyConstructor) {
+  RBTree<int> first;
+
+  for (size_t i = 0; i < nTests; ++i) {
+    first.add(i);
+  }
+
+  RBTree<int> second(first);
+  ASSERT_EQ(second.getsize(), nTests);
+  ASSERT_EQ(first.getsize(), nTests);
+}
+
+TEST(RBTreeTest, MoveAndEqConstructor) {
   RBTree<int> first;
   RBTree<int> second;
 
-  for(size_t i = 0; i < nTests; ++i) {
+  for (size_t i = 0; i < nTests; ++i) {
     first.add(i);
   }
 
   second = std::move(first);
 
   ASSERT_EQ(nTests, second.getsize());
+}
+
+TEST(RBTreeTest, MoveConstructor) {
+  RBTree<int> first;
+
+  for (size_t i = 0; i < nTests; ++i) {
+    first.add(i);
+  }
+
+  RBTree<int> second(std::move(first));
+  ASSERT_EQ(second.getsize(), nTests);
 }
 
 int main(int argc, char* argv[]) {
