@@ -2,6 +2,7 @@
 #define RBTREE_INCLUDES_REDBLACK_IMPL_HPP
 
 #include <algorithm>
+#include <cassert>
 #include <iostream>
 #include <vector>
 
@@ -16,11 +17,14 @@ template <class T>
 NodeT<T>::NodeT() {
   color_ = RED;
   frequency_ = 0;
-  left_ = right_ = parent_ = nullptr;
+
+  left_ = nullptr;
+  right_ = nullptr;
+  parent_ = nullptr;
 }
 
 template <class T>
-NodeT<T>::NodeT(const NodeT& other) {
+NodeT<T>::NodeT(const NodeT<T>& other) {
   data_ = other.data_;
   color_ = other.color_;
   frequency_ = other.frequency_;
@@ -36,23 +40,28 @@ NodeT<T>::NodeT(const T& rhs) {
   color_ = BLACK;
   frequency_ = 1;
 
-  left_ = right_ = parent_ = nullptr;
+  left_ = nullptr;
+  right_ = nullptr;
+  parent_ = nullptr;
 }
 
 template <class T>
-NodeT<T>::NodeT(NodeT&& other) noexcept {
-  std::swap(data_, other.data_);
-  std::swap(color_, other.color_);
-  std::swap(frequency_, other.frequency_);
+NodeT<T>::NodeT(NodeT<T>&& other) noexcept {
+  data_ = other.data_;
+  color_ = other.color_;
+  frequency_ = other.frequency_;
+  left_ = other.left_;
+  right_ = other.right_;
+  parent_ = other.parent_;
 
-  std::swap(left_, other.left_);
-  std::swap(right_, other.right_);
-  std::swap(parent_, other.parent_);
+  other.left_ = nullptr;
+  other.right_ = nullptr;
+  other.parent_ = nullptr;
 }
 
 template <class T>
 NodeT<T>* RBTree<T>::grandparent(NodeT<T>* ptr) {
-  if (ptr != nullptr && ptr->parent_ && ptr->parent_->parent_)
+  if ((ptr != nullptr) && (ptr->parent_ != nullptr) && (ptr->parent_->parent_ != nullptr))
     return ptr->parent_->parent_;
 
   return nullptr;
@@ -60,13 +69,27 @@ NodeT<T>* RBTree<T>::grandparent(NodeT<T>* ptr) {
 
 template <class T>
 NodeT<T>* RBTree<T>::uncle(NodeT<T>* ptr) {
-  if (!grandparent(ptr))
+  if (grandparent(ptr) == nullptr)
     return nullptr;
 
-  if (grandparent(ptr)->left_ == ptr->parent_)
+  if ((grandparent(ptr)->left_ == ptr->parent_) && (grandparent(ptr)->right_ != nullptr))
     return grandparent(ptr)->right_;
 
-  return grandparent(ptr)->left_;
+  if ((grandparent(ptr)->right_ == ptr->parent_) && (grandparent(ptr)->left_ != nullptr))
+    return grandparent(ptr)->left_;
+
+  return nullptr;
+}
+
+template <class T>
+NodeT<T>* RBTree<T>::sibling(NodeT<T>* ptr) {
+  if (ptr->parent_ == nullptr)
+    return nullptr;
+
+  if (ptr == ptr->parent_->left_)
+    return ptr->parent_->right_;
+
+  return ptr->parent_->left_;
 }
 
 template <class T>
@@ -78,24 +101,28 @@ RBTree<T>::RBTree() {
 template <class T>
 RBTree<T>::RBTree(const RBTree<T>& other) {
   size_ = other.size_;
-  root_ = other.root_;
+  root_ = copy_tree(other.root_);
 }
 
 template <class T>
 RBTree<T>::RBTree(RBTree<T>&& other) noexcept {
-  std::swap(size_, other.size_);
-  std::swap(root_, other.root_);
+  size_ = other.size_;
+  root_ = other.root_;
+
+  other.root_ = nullptr;
 }
 
 template <class T>
 void RBTree<T>::delete_tree(NodeT<T>* ptr) {
-  if (!ptr)
+  if (ptr == nullptr)
     return;
 
-  if(ptr->left_)
+  assert(ptr);
+
+  if (ptr->left_ != nullptr)
     delete_tree(ptr->left_);
 
-  if(ptr->right_)
+  if (ptr->right_ != nullptr)
     delete_tree(ptr->right_);
 
   delete ptr;
@@ -123,18 +150,17 @@ NodeT<T>* RBTree<T>::get_root() const {
 
 template <class T>
 void RBTree<T>::rotate_left(NodeT<T>* n) {
-  if (!n) {
-    return;
-  }
-
-  if (n == root_)
+  if (n == nullptr)
     return;
 
   NodeT<T>* pivot = n->right_;
 
   pivot->parent_ = n->parent_;
+  if (pivot->parent_ == nullptr && root_ == n) {
+    root_ = pivot;
+  }
 
-  if (n->parent_) {
+  if (n->parent_ != nullptr) {
     if (n->parent_->left_ == n)
       n->parent_->left_ = pivot;
 
@@ -144,7 +170,7 @@ void RBTree<T>::rotate_left(NodeT<T>* n) {
 
   n->right_ = pivot->left_;
 
-  if (pivot->left_)
+  if (pivot->left_ != nullptr)
     pivot->left_->parent_ = n;
 
   n->parent_ = pivot;
@@ -153,21 +179,17 @@ void RBTree<T>::rotate_left(NodeT<T>* n) {
 
 template <class T>
 void RBTree<T>::rotate_right(NodeT<T>* n) {
-  if (!n) {
-    return;
-  }
-
-  if (n == root_)
-    return;
-
-  if (!n->left_)
+  if (n == nullptr)
     return;
 
   NodeT<T>* pivot = n->left_;
 
   pivot->parent_ = n->parent_;
+  if (pivot->parent_ == nullptr && root_ == n) {
+    root_ = pivot;
+  }
 
-  if (n->parent_) {
+  if (n->parent_ != nullptr) {
     if (n->parent_->left_ == n)
       n->parent_->left_ = pivot;
 
@@ -177,7 +199,7 @@ void RBTree<T>::rotate_right(NodeT<T>* n) {
 
   n->left_ = pivot->right_;
 
-  if (pivot->right_)
+  if (pivot->right_ != nullptr)
     pivot->right_->parent_ = n;
 
   n->parent_ = pivot;
@@ -188,21 +210,18 @@ template <class T>
 NodeT<T>* RBTree<T>::insert(const T& rhs) {
   auto cur = new NodeT<T>();
 
+  cur->frequency_ = 1;
   cur->data_ = rhs;
   cur->color_ = RED;
   cur->left_ = cur->right_ = nullptr;
 
   if (!size_) {
-    root_ = cur;
-    cur->parent_ = nullptr;
     ++size_;
-    ++cur->frequency_;
-    return cur;
-  }
-
-  if (root_->data_ == rhs) {
-    ++root_->frequency_;
-    delete cur;
+    root_ = cur;
+    root_->color_ = BLACK;
+    root_->parent_ = nullptr;
+    root_->left_ = nullptr;
+    root_->right_ = nullptr;
     return nullptr;
   }
 
@@ -215,30 +234,26 @@ NodeT<T>* RBTree<T>::insert(const T& rhs) {
       return nullptr;
     }
 
-    if (mind->data_ < rhs) {
-      if (mind->right_) {
-        mind = mind->right_;
-      }
+    if (mind->data_ > rhs) {
+      if (mind->left_ != nullptr)
+        mind = mind->left_;
 
       else {
-        mind->right_ = cur;
-        cur->parent_ = mind;
         ++size_;
-        ++cur->frequency_;
+        mind->left_ = cur;
+        cur->parent_ = mind;
         return cur;
       }
     }
 
-    else if (mind->data_ > rhs) {
-      if (mind->left_) {
-        mind = mind->left_;
-      }
+    if (mind->data_ < rhs) {
+      if (mind->right_ != nullptr)
+        mind = mind->right_;
 
       else {
-        mind->left_ = cur;
-        cur->parent_ = mind;
         ++size_;
-        ++cur->frequency_;
+        mind->right_ = cur;
+        cur->parent_ = mind;
         return cur;
       }
     }
@@ -247,137 +262,90 @@ NodeT<T>* RBTree<T>::insert(const T& rhs) {
 
 template <class T>
 void RBTree<T>::balance(NodeT<T>* ptr) {
+  if (ptr == nullptr)
+    return;
+
   insert_case1(ptr);
 }
 
 template <class T>
 void RBTree<T>::insert_case1(NodeT<T>* ptr) {
-  if (!ptr) {
-    return;
-  }
-
-  if (!ptr->parent_) {
+  if (ptr->parent_ == nullptr)
     ptr->color_ = BLACK;
-  }
 
-  else {
+  else
     insert_case2(ptr);
-  }
 }
 
 template <class T>
 void RBTree<T>::insert_case2(NodeT<T>* ptr) {
-  if (!ptr)
+  if (ptr->parent_->color_ == BLACK)
     return;
 
-  if (ptr->parent_->color_ == BLACK) {
-    return;
-  }
-
-  insert_case3(ptr);
+  else if (grandparent(ptr) != nullptr)
+    insert_case3(ptr);
 }
 
 template <class T>
 void RBTree<T>::insert_case3(NodeT<T>* ptr) {
-  if (!ptr)
-    return;
-
   NodeT<T>* u = uncle(ptr);
   NodeT<T>* g;
 
-  if ((u) && (u->color_ == RED)) {
+  if ((u != nullptr) && (u->color_ == RED)) {
     ptr->parent_->color_ = BLACK;
     u->color_ = BLACK;
     g = grandparent(ptr);
     g->color_ = RED;
     insert_case1(g);
-  }
-
-  else {
+  } else {
     insert_case4(ptr);
   }
-
-  return;
 }
 
 template <class T>
 void RBTree<T>::insert_case4(NodeT<T>* ptr) {
-  if (!ptr)
-    return;
+  NodeT<T>* g = grandparent(ptr);
 
-  if (grandparent(ptr)) {
-    NodeT<T>* g = grandparent(ptr);
-
-    if ((ptr == ptr->parent_->right_) && (ptr->parent_ == g->left_)) {
-      rotate_left(ptr->parent_);
-
-      ptr = ptr->left_;
-    }
-
-    else if ((ptr == ptr->parent_->left_) && (ptr->parent_ == g->right_)) {
-      rotate_right(ptr->parent_);
-
-      ptr = ptr->right_;
-    }
-
-    insert_case5(ptr);
+  if ((ptr == ptr->parent_->right_) && (ptr->parent_ == g->left_)) {
+    rotate_left(ptr->parent_);
+    ptr = ptr->left_;
+  } else if ((ptr == ptr->parent_->left_) && (ptr->parent_ == g->right_)) {
+    rotate_right(ptr->parent_);
+    ptr = ptr->right_;
   }
 
-  return;
+  insert_case5(ptr);
 }
 
 template <class T>
 void RBTree<T>::insert_case5(NodeT<T>* ptr) {
-  if (!ptr) {
-    return;
-  }
-
-  NodeT<T>* g = grandparent(ptr);
+  NodeT<T>* g = nullptr;
+  g = grandparent(ptr);
 
   ptr->parent_->color_ = BLACK;
   g->color_ = RED;
 
-  if ((ptr = ptr->parent_->left_) && (ptr->parent_ == g->left_)) {
+  if ((ptr == ptr->parent_->left_) && (ptr->parent_ == g->left_)) {
     rotate_right(g);
-  } else {
+  } else if ((ptr == ptr->parent_->right_) && (ptr->parent_ == g->right_)) {
     rotate_left(g);
   }
-
-  return;
 }
 
 template <class T>
 void RBTree<T>::add(const T& rhs) {
   NodeT<T>* res = insert(rhs);
 
-  if (res) {
-    balance(res);
-  }
+  balance(res);
 }
 
 template <class T>
 bool RBTree<T>::search(const T& rhs) {
-  NodeT<T>* cur = root_;
+  auto res = inorder();
 
-  while (1) {
-    if (cur->data_ == rhs) {
+  for (auto n : res) {
+    if (n->data_ == rhs) {
       return true;
-    }
-
-    if (rhs > cur->data_) {
-      if (cur->right_)
-        cur = cur->right_;
-
-      else
-        return false;
-    }
-
-    if (rhs < cur->data_) {
-      if (cur->left_)
-        cur = cur->left_;
-
-      else
-        return false;
     }
   }
 
@@ -385,31 +353,35 @@ bool RBTree<T>::search(const T& rhs) {
 }
 
 template <class T>
-NodeT<T>* RBTree<T>::copy_tree(const NodeT<T>& other, const NodeT<T>* parent) {
+NodeT<T>* RBTree<T>::copy_tree(const NodeT<T>* other) {
   auto res = new NodeT<T>();
-  res->color_ = other.color_;
-  res->data_ = other.data_;
-  res->parent_ = parent;
+  res->color_ = other->color_;
+  res->data_ = other->data_;
+  res->parent_ = other->parent_;
 
-  res->left_ = copy_tree(other->left_, res);
-  res->right_ = copy_tree(other->right_, res);
+  if (other->left_ != nullptr)
+    res->left_ = copy_tree(other->left_);
+
+  if (other->right_ != nullptr)
+    res->right_ = copy_tree(other->right_);
+
   return res;
 }
 
 template <class T>
-RBTree<T>& RBTree<T>::operator=(const RBTree& other) {
+RBTree<T>& RBTree<T>::operator=(const RBTree<T>& other) {
   if (this != &other) {
     delete_tree(root_);
 
     size_ = other.size_;
-    root_ = copy_tree(other.root_, other.root_->parent_);
+    root_ = copy_tree(other.root_);
   }
 
   return *this;
 }
 
 template <class T>
-RBTree<T>& RBTree<T>::operator=(RBTree&& other) {
+RBTree<T>& RBTree<T>::operator=(RBTree<T>&& other) noexcept {
   if (this != &other) {
     delete_tree(root_);
     size_ = other.size_;
@@ -461,20 +433,20 @@ std::vector<NodeT<T>*> RBTree<T>::inorder() const {
   auto cur = root_;
   std::vector<NodeT<T>*> resarr;
 
-  while(true){
-    while(cur != nullptr) {
+  while (true) {
+    while (cur != nullptr) {
       s.push(cur);
       cur = cur->left_;
     }
 
-    if(cur == nullptr && !s.is_empty()) {
+    if (cur == nullptr && !s.is_empty()) {
       auto mind = s.top();
       resarr.push_back(mind);
       cur = mind->right_;
       s.pop();
     }
 
-    if(cur == nullptr && s.is_empty()) {
+    if (cur == nullptr && s.is_empty()) {
       break;
     }
   }
@@ -482,6 +454,14 @@ std::vector<NodeT<T>*> RBTree<T>::inorder() const {
   return resarr;
 }
 
+template <class T>
+void RBTree<T>::print_inorder() const {
+  auto res = inorder();
+  for (auto n : res) {
+    std::cout << "data " << n->data_;
+    std::cout << " freq " << n->frequency_ << std::endl;
+  }
+}
 
 template <class T>
 T RBTree<T>::find_most_frequent() const {
@@ -489,8 +469,8 @@ T RBTree<T>::find_most_frequent() const {
   size_t fr = 0;
   T ans;
 
-  for(auto n : res) {
-    if(n->frequency_ > fr) {
+  for (auto n : res) {
+    if (n->frequency_ > fr) {
       fr = n->frequency_;
       ans = n->data_;
     }
