@@ -30,11 +30,11 @@ class RBTree {
 
   bool is_empty() const;
   size_t getsize() const;
-  NodeT<T>* get_root() const;
+  std::pair<T, size_t> get_root() const;
 
-  void rotate_left(NodeT<T>* n);
-  void rotate_right(NodeT<T>* n);
   void add(const T& rhs);
+  size_t delete_elem(const T& rhs);
+
   void print_inorder() const;
 
   bool search(const T& rhs);
@@ -62,11 +62,26 @@ class RBTree {
   NodeT<T>* sibling(NodeT<T>* ptr);
   NodeT<T>* grandparent(NodeT<T>* ptr);
 
+  void rotate_left(NodeT<T>* n);
+  void rotate_right(NodeT<T>* n);
+
   void insert_case1(NodeT<T>* ptr);
   void insert_case2(NodeT<T>* ptr);
   void insert_case3(NodeT<T>* ptr);
   void insert_case4(NodeT<T>* ptr);
   void insert_case5(NodeT<T>* ptr);
+
+  NodeT<T>* is_leaf(NodeT<T>* ptr);
+  NodeT<T>* find_desc(NodeT<T>* ptr);
+  void delete_one_child(NodeT<T>* ptr);
+  void replace_node(NodeT<T>* first, NodeT<T>* second);
+
+  void delete_case1(NodeT<T>* ptr);
+  void delete_case2(NodeT<T>* ptr);
+  void delete_case3(NodeT<T>* ptr);
+  void delete_case4(NodeT<T>* ptr);
+  void delete_case5(NodeT<T>* ptr);
+  void delete_case6(NodeT<T>* ptr);
 };
 
 #endif  // RBTREE_INCLUDES_REDBLACK_HPP
