@@ -8,7 +8,7 @@
 
 #include "redblack_impl.hpp"
 
-static const size_t nTests = 1e5;
+static const size_t nTests = 1e4;
 
 TEST(NodeT, CopyConstructor) {
   int val = rand() % nTests;
@@ -40,13 +40,13 @@ TEST(NodeT, MoveConstructor) {
 
 TEST(RBTreeTest, Crushtest) {
   RBTree<int> first;
-  for (size_t i = 0; i < nTests; ++i) {
-    int x = rand() % nTests;
-    first.add(x);
-  }
 
   for (size_t i = 0; i < nTests; ++i) {
     first.add(i);
+  }
+
+  for(size_t i = 0; i < nTests; ++i) {
+    first.delete_elem(i);
   }
 }
 
