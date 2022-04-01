@@ -45,7 +45,7 @@ TEST(RBTreeTest, Crushtest) {
     first.add(i);
   }
 
-  for(size_t i = 0; i < nTests; ++i) {
+  for (size_t i = 0; i < nTests; ++i) {
     first.delete_elem(i);
   }
 }
@@ -60,7 +60,7 @@ TEST(RBTreeTest, Size) {
   ASSERT_EQ(first.getsize(), nTests);
 }
 
-TEST(RBTreeTest, Search) {
+TEST(RBTreeTest, IsElem) {
   RBTree<int> first;
   int val;
   size_t num = rand() % nTests;
@@ -73,7 +73,7 @@ TEST(RBTreeTest, Search) {
     }
   }
 
-  ASSERT_TRUE(first.search(val));
+  ASSERT_TRUE(first.iselem(val));
 }
 
 TEST(RBTreeTest, Equality) {
@@ -176,6 +176,51 @@ TEST(RBTreeTest, MoveConstructor) {
 
   RBTree<int> second(std::move(first));
   ASSERT_EQ(second.getsize(), nTests);
+}
+
+TEST(RBTreeTest, Inorder) {
+  RBTree<int> first;
+
+  for (size_t i = 0; i < nTests; ++i) {
+    first.add(i);
+  }
+
+  auto res = first.get_inorder();
+  for (size_t i = 1; i < first.getsize(); ++i) {
+    ASSERT_TRUE(res[i] > res[i - 1]);
+  }
+}
+
+TEST(RBTreeTest, GetFrequency) {
+  RBTree<int> first;
+
+  for (size_t i = 0; i < nTests; ++i) {
+    first.add(i);
+  }
+
+  int elem = rand() % nTests;
+  ASSERT_EQ(first.get_frequency(elem), 1);
+
+  for (size_t i = 1; i < nTests; ++i) {
+    first.add(elem);
+  }
+
+  ASSERT_EQ(first.get_frequency(elem), nTests);
+}
+
+TEST(RBTreeTest, SetFrequency) {
+  RBTree<int> first;
+
+  int num = rand() % nTests;
+  int newfreq = rand() % nTests + nTests;
+
+  for (size_t i = 0; i < nTests; ++i) {
+    first.add(i);
+  }
+
+  first.set_frequency(num, newfreq);
+
+  ASSERT_EQ(first.get_frequency(num), newfreq);
 }
 
 int main(int argc, char* argv[]) {
