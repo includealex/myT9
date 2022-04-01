@@ -130,7 +130,7 @@ void RBTree<T>::delete_tree(NodeT<T>* ptr) {
 
 template <class T>
 RBTree<T>::~RBTree() {
-  if(size_)
+  if (size_)
     delete_tree(root_);
 }
 
@@ -343,7 +343,7 @@ void RBTree<T>::add(const T& rhs) {
 }
 
 template <class T>
-bool RBTree<T>::search(const T& rhs) {
+bool RBTree<T>::iselem(const T& rhs) const {
   auto res = inorder();
 
   for (auto n : res) {
@@ -458,17 +458,25 @@ std::vector<NodeT<T>*> RBTree<T>::inorder() const {
 }
 
 template <class T>
-void RBTree<T>::print_inorder() const {
-  if(!size_) {
-    std::cout << "Tree is empty" << std::endl;
-    return;
-  }
+std::vector<T> RBTree<T>::get_inorder() const {
+  assert(size_);
+
+  std::vector<T> ans;
 
   auto res = inorder();
   for (auto n : res) {
-    std::cout << "data " << n->data_;
-    std::cout << " freq " << n->frequency_;
-    std::cout << " color " << n->color_ << std::endl;
+    ans.push_back(n->data_);
+  }
+
+  return ans;
+}
+
+template <class T>
+void RBTree<T>::print_inorder() const {
+  auto arr = get_inorder();
+
+  for (auto n : arr) {
+    std::cout << n << " ";
   }
 }
 
@@ -490,7 +498,7 @@ T RBTree<T>::find_most_frequent() const {
 
 template <class T>
 size_t RBTree<T>::delete_elem(const T& rhs) {
-  if (size_ == 0 || !search(rhs)) {
+  if (size_ == 0 || !iselem(rhs)) {
     return 0;
   }
 
@@ -530,8 +538,8 @@ void RBTree<T>::delete_one_child(NodeT<T>* ptr) {
       delete_case1(ptr);
     }
 
-    if(ptr != root_) {
-      if(ptr == ptr->parent_->left_)
+    if (ptr != root_) {
+      if (ptr == ptr->parent_->left_)
         ptr->parent_->left_ = nullptr;
       else
         ptr->parent_->right_ = nullptr;
@@ -617,7 +625,7 @@ void RBTree<T>::delete_case1(NodeT<T>* ptr) {
   if (ptr->parent_ != nullptr)
     delete_case2(ptr);
   else
-     root_ = ptr;
+    root_ = ptr;
 }
 
 template <class T>
@@ -648,20 +656,21 @@ void RBTree<T>::delete_case3(NodeT<T>* ptr) {
   bool s_right_is_black = true;
   bool s_left_is_black = true;
 
-  if(s->left_ != nullptr) {
-    if(s->left_->color_ != BLACK)
+  if (s->left_ != nullptr) {
+    if (s->left_->color_ != BLACK)
       s_left_is_black = false;
   }
 
-  if(s->right_ != nullptr) {
-    if(s->right_->color_ != BLACK)
+  if (s->right_ != nullptr) {
+    if (s->right_->color_ != BLACK)
       s_right_is_black = false;
   }
-  
-  if((ptr->parent_->color_ == BLACK) && (s->color_ == BLACK) && s_left_is_black && s_right_is_black) {
+
+  if ((ptr->parent_->color_ == BLACK) && (s->color_ == BLACK) && s_left_is_black &&
+      s_right_is_black) {
     s->color_ = RED;
     delete_case1(ptr->parent_);
-  }  
+  }
 
   else {
     delete_case4(ptr);
@@ -677,17 +686,18 @@ void RBTree<T>::delete_case4(NodeT<T>* ptr) {
   bool s_right_is_black = true;
   bool s_left_is_black = true;
 
-  if(s->left_ != nullptr) {
-    if(s->left_->color_ != BLACK)
+  if (s->left_ != nullptr) {
+    if (s->left_->color_ != BLACK)
       s_left_is_black = false;
   }
 
-  if(s->right_ != nullptr) {
-    if(s->right_->color_ != BLACK)
+  if (s->right_ != nullptr) {
+    if (s->right_->color_ != BLACK)
       s_right_is_black = false;
   }
 
-  if ((ptr->parent_->color_ == RED) && (s->color_ == BLACK) && s_left_is_black && s_right_is_black) {
+  if ((ptr->parent_->color_ == RED) && (s->color_ == BLACK) && s_left_is_black &&
+      s_right_is_black) {
     s->color_ = RED;
     ptr->parent_->color_ = BLACK;
   }
@@ -705,13 +715,13 @@ void RBTree<T>::delete_case5(NodeT<T>* ptr) {
   bool s_right_is_black = true;
   bool s_left_is_black = true;
 
-  if(s->left_ != nullptr) {
-    if(s->left_->color_ != BLACK)
+  if (s->left_ != nullptr) {
+    if (s->left_->color_ != BLACK)
       s_left_is_black = false;
   }
 
-  if(s->right_ != nullptr) {
-    if(s->right_->color_ != BLACK)
+  if (s->right_ != nullptr) {
+    if (s->right_->color_ != BLACK)
       s_right_is_black = false;
   }
 
@@ -722,8 +732,7 @@ void RBTree<T>::delete_case5(NodeT<T>* ptr) {
       rotate_right(s);
     }
 
-    else if ((ptr == ptr->parent_->right_) && s_left_is_black &&
-               (s->right_->color_ == RED)) {
+    else if ((ptr == ptr->parent_->right_) && s_left_is_black && (s->right_->color_ == RED)) {
       s->color_ = RED;
       s->right_->color_ = BLACK;
       rotate_left(s);
@@ -742,17 +751,57 @@ void RBTree<T>::delete_case6(NodeT<T>* ptr) {
   s->color_ = ptr->parent_->color_;
   ptr->parent_->color_ = BLACK;
 
-  if (ptr == ptr->parent_->left_) {   
+  if (ptr == ptr->parent_->left_) {
     s->right_->color_ = BLACK;
-    
+
     rotate_left(ptr->parent_);
   }
 
   else {
     s->left_->color_ = BLACK;
-    
+
     rotate_right(ptr->parent_);
   }
+}
+
+template <class T>
+NodeT<T>* RBTree<T>::search(const T& val) const {
+  if (!size_)
+    return nullptr;
+
+  if (!iselem(val))
+    return nullptr;
+
+  auto cur = root_;
+
+  while (cur->data_ != val) {
+    if (cur->data_ < val)
+      cur = cur->right_;
+    else
+      cur = cur->left_;
+  }
+
+  return cur;
+}
+
+template <class T>
+size_t RBTree<T>::get_frequency(const T& val) const {
+  auto res = search(val);
+  if (res == nullptr)
+    return 0;
+
+  return res->frequency_;
+}
+
+template <class T>
+void RBTree<T>::set_frequency(const T& val, const T& newfreq) {
+  auto res = search(val);
+  if (res == nullptr) {
+    std::cout << "working with unexisting valuable" << std::endl;
+    return;
+  }
+
+  res->frequency_ = newfreq;
 }
 
 #endif  // RBTREE_INCLUDES_REDBLACK_IMPL_HPP

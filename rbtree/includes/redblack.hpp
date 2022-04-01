@@ -35,9 +35,12 @@ class RBTree {
   void add(const T& rhs);
   size_t delete_elem(const T& rhs);
 
+  std::vector<T> get_inorder() const;
   void print_inorder() const;
 
-  bool search(const T& rhs);
+  bool iselem(const T& rhs) const;
+  size_t get_frequency(const T& val) const;
+  void set_frequency(const T& val, const T& newfreq);
 
   RBTree<T>& operator=(const RBTree<T>& other);
   RBTree<T>& operator=(RBTree<T>&& other) noexcept;
@@ -51,11 +54,10 @@ class RBTree {
   size_t size_;
   NodeT<T>* root_;
 
+  NodeT<T>* search(const T& val) const;
   std::vector<NodeT<T>*> inorder() const;
   void delete_tree(NodeT<T>* ptr);
   NodeT<T>* copy_tree(const NodeT<T>* other);
-  NodeT<T>* insert(const T& rhs);
-  void balance(NodeT<T>* ptr);
   bool checkequality(const NodeT<T>* froot, const NodeT<T>* sroot) const;
 
   NodeT<T>* uncle(NodeT<T>* ptr);
@@ -65,11 +67,13 @@ class RBTree {
   void rotate_left(NodeT<T>* n);
   void rotate_right(NodeT<T>* n);
 
+  NodeT<T>* insert(const T& rhs);
   void insert_case1(NodeT<T>* ptr);
   void insert_case2(NodeT<T>* ptr);
   void insert_case3(NodeT<T>* ptr);
   void insert_case4(NodeT<T>* ptr);
   void insert_case5(NodeT<T>* ptr);
+  void balance(NodeT<T>* ptr);
 
   NodeT<T>* is_leaf(NodeT<T>* ptr);
   NodeT<T>* find_desc(NodeT<T>* ptr);
