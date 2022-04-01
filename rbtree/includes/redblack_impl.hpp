@@ -794,7 +794,7 @@ size_t RBTree<T>::get_frequency(const T& val) const {
 }
 
 template <class T>
-void RBTree<T>::set_frequency(const T& val, const T& newfreq) {
+void RBTree<T>::set_frequency(const T& val, const size_t& newfreq) {
   auto res = search(val);
   if (res == nullptr) {
     std::cout << "working with unexisting valuable" << std::endl;

@@ -40,7 +40,7 @@ class RBTree {
 
   bool iselem(const T& rhs) const;
   size_t get_frequency(const T& val) const;
-  void set_frequency(const T& val, const T& newfreq);
+  void set_frequency(const T& val, const size_t& newfreq);
 
   RBTree<T>& operator=(const RBTree<T>& other);
   RBTree<T>& operator=(RBTree<T>&& other) noexcept;
