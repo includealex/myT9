@@ -7,8 +7,8 @@
 #include <iostream>
 #include <vector>
 
-#include "../../Stack/Stack/includes/Stack.h"
-#include "../../Stack/Stack/includes/Stack_impl.h"
+#include "Stack.h"
+#include "Stack_impl.h"
 #include "redblack.hpp"
 
 #define RED true
