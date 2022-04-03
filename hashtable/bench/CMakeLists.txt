@@ -1,0 +1,24 @@
+find_package(benchmark REQUIRED)
+
+add_executable(htable_bench_percent_for_realloc percrealloc.cpp)
+target_link_libraries(htable_bench_percent_for_realloc hashtable benchmark::benchmark)
+
+add_custom_target(run_htable_bench_percent_for_realloc
+    COMMAND ./htable_bench_percent_for_realloc
+)
+
+add_dependencies(run_htable_bench_percent_for_realloc htable_bench_percent_for_realloc hashtable)
+
+add_executable(htable_bench_val_to_realloc reallocsize.cpp)
+target_link_libraries(htable_bench_val_to_realloc hashtable benchmark::benchmark)
+
+add_custom_target(run_htable_bench_val_to_realloc
+    COMMAND ./htable_bench_val_to_realloc
+)
+
+add_dependencies(run_htable_bench_val_to_realloc htable_bench_val_to_realloc hashtable)
+
+add_custom_target(run_htable_all_bench
+)
+
+add_dependencies(run_htable_all_bench run_htable_bench_percent_for_realloc run_htable_bench_val_to_realloc)
