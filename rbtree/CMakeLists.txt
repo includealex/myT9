@@ -6,8 +6,8 @@ add_subdirectory(tests)
 file(GLOB_RECURSE RBTREE_HEADERS *.hpp)
 file(GLOB_RECURSE RBTREE_SOURCES *.cpp)
 
-
-add_library(rbtree STATIC ${RBTREE_SOURCES} ${RBTREE_HEADERS})
+add_library(rbtree STATIC ${RBTREE_SOURCES} ${RBTREE_HEADERS} )
+target_link_libraries(rbtree stack)
 
 set(RBTREE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/includes)
 target_include_directories(rbtree PUBLIC ${RBTREE_INCLUDE})
