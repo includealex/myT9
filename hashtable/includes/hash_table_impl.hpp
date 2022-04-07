@@ -27,17 +27,18 @@ HashTable<T, Hash>::HashTable(const HashTable<T, Hash>& other) {
   size_ = other.size_;
   counter_ = other.counter_;
   indexes_ = other.indexes_;
-  
+
   table_ = new RBTree<T>[size_];
 
-  for(size_t i = 0; i < other.size_; ++i) {
-    if(other.table_[i].getsize())
+  for (size_t i = 0; i < other.size_; ++i) {
+    if (other.table_[i].getsize())
       table_[i] = other.table_[i];
   }
 }
 
 template <typename T, typename Hash>
-HashTable<T, Hash>::HashTable(HashTable&& other) noexcept : size_(other.size_), counter_(other.counter_), indexes_(other.indexes_), table_(other.table_){
+HashTable<T, Hash>::HashTable(HashTable&& other) noexcept
+    : size_(other.size_), counter_(other.counter_), indexes_(other.indexes_), table_(other.table_) {
   other.counter_ = 0;
   other.size_ = 0;
   other.indexes_.clear();
@@ -51,8 +52,8 @@ HashTable<T, Hash>::~HashTable() {
 }
 
 template <typename T, typename Hash>
-HashTable<T, Hash>& HashTable<T, Hash>::operator=(const HashTable<T, Hash>&other) {
-  if(this == &other)
+HashTable<T, Hash>& HashTable<T, Hash>::operator=(const HashTable<T, Hash>& other) {
+  if (this == &other)
     return *this;
 
   delete[] table_;
@@ -61,8 +62,8 @@ HashTable<T, Hash>& HashTable<T, Hash>::operator=(const HashTable<T, Hash>&other
   counter_ = other.counter_;
 
   table_ = new RBTree<T>[size_];
-  for(size_t i = 0; i < size_; ++i) {
-    if(other.table_[i].getsize())
+  for (size_t i = 0; i < size_; ++i) {
+    if (other.table_[i].getsize())
       table_[i] = other.table_[i];
   }
 
@@ -71,7 +72,7 @@ HashTable<T, Hash>& HashTable<T, Hash>::operator=(const HashTable<T, Hash>&other
 
 template <typename T, typename Hash>
 HashTable<T, Hash>& HashTable<T, Hash>::operator=(HashTable<T, Hash>&& other) noexcept {
-  if(this == &other)
+  if (this == &other)
     return *this;
 
   delete[] table_;
@@ -87,17 +88,17 @@ HashTable<T, Hash>& HashTable<T, Hash>::operator=(HashTable<T, Hash>&& other) no
 }
 
 template <typename T, typename Hash>
-bool HashTable<T, Hash>::operator==(const HashTable<T, Hash> &other) const{
-  if(size_ != other.size_)
+bool HashTable<T, Hash>::operator==(const HashTable<T, Hash>& other) const {
+  if (size_ != other.size_)
     return false;
-  if(counter_ != other.counter_)
+  if (counter_ != other.counter_)
     return false;
-  if(indexes_ != other.indexes_)
+  if (indexes_ != other.indexes_)
     return false;
-  
-  for(size_t i = 0; i < size_; ++i) {
-    if((other.table_[i].getsize() && table_[i].getsize())) {
-      if(other.table_[i] != table_[i])
+
+  for (size_t i = 0; i < size_; ++i) {
+    if ((other.table_[i].getsize() && table_[i].getsize())) {
+      if (other.table_[i] != table_[i])
         return false;
     }
   }
@@ -106,12 +107,12 @@ bool HashTable<T, Hash>::operator==(const HashTable<T, Hash> &other) const{
 }
 
 template <typename T, typename Hash>
-bool HashTable<T, Hash>::operator!=(const HashTable<T, Hash> &other) const{
+bool HashTable<T, Hash>::operator!=(const HashTable<T, Hash>& other) const {
   return !(*this == other);
 }
 
 template <typename T, typename Hash>
-size_t HashTable<T, Hash>::gethash(const T& str) {
+size_t HashTable<T, Hash>::gethash(const T& str) const {
   auto foo = Hash();
 
   auto res = foo(str) % size_;
@@ -136,7 +137,7 @@ void HashTable<T, Hash>::addelem(const T& str) {
 }
 
 template <typename T, typename Hash>
-bool HashTable<T, Hash>::iselem(const T& str) {
+bool HashTable<T, Hash>::iselem(const T& str) const {
   size_t num = gethash(str);
 
   if (!table_[num].getsize()) {
@@ -147,20 +148,30 @@ bool HashTable<T, Hash>::iselem(const T& str) {
 }
 
 template <typename T, typename Hash>
-size_t HashTable<T, Hash>::get_counter() {
+size_t HashTable<T, Hash>::getfreq(const T& str) const {
+  if (!iselem(str))
+    return 0;
+
+  size_t num = gethash(str);
+
+  return table_[num].get_frequency(str);
+}
+
+template <typename T, typename Hash>
+size_t HashTable<T, Hash>::get_counter() const {
   return counter_;
 }
 
 template <typename T, typename Hash>
-size_t HashTable<T, Hash>::get_size() {
+size_t HashTable<T, Hash>::get_size() const {
   return size_;
 }
 
-template<typename T, typename Hash>
+template <typename T, typename Hash>
 void HashTable<T, Hash>::tree_rehash(RBTree<T>& tree, std::vector<size_t>& rem) {
   std::vector<T> elems = tree.get_inorder();
 
-  for(auto n : elems) {
+  for (auto n : elems) {
     auto val = gethash(n);
     table_[val].add(n);
     rem.push_back(val);
@@ -173,14 +184,14 @@ void HashTable<T, Hash>::hash_realloc() {
   auto newsize_ = static_cast<size_t>(size_ * val_for_realloc_);
   std::vector<size_t> rem;
 
-  table_ = new RBTree<T> [newsize_];
-  for(auto el : indexes_) {
+  table_ = new RBTree<T>[newsize_];
+  for (auto el : indexes_) {
     auto tree = mind_[el];
     tree_rehash(tree, rem);
   }
 
   indexes_.clear();
-  for(auto el : rem) {
+  for (auto el : rem) {
     indexes_.insert(el);
   }
 

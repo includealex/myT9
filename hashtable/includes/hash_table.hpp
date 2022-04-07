@@ -2,6 +2,7 @@
 #define HASHTABLE_INCLUDES_HASH_TABLE_HPP
 
 #include <cstdlib>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -22,27 +23,30 @@ class HashTable {
   bool operator!=(const HashTable& other) const;
 
   void addelem(const T& str);
-  bool iselem(const T& str);
+  bool iselem(const T& str) const;
+  size_t getfreq(const T& str) const;
 
-  size_t get_counter();
-  size_t get_size();
+  size_t get_counter() const;
+  size_t get_size() const;
 
-  template<class U>
-  friend void change_realloc_size(HashTable<U>& h, double rhs, double startval); 
+  template <class U>
+  friend void change_realloc_size(HashTable<U>& h, double rhs, double startval);
 
-  template<class U>
-  friend void change_realloc_perc(HashTable<U>& h, double rhs, double startval); 
+  template <class U>
+  friend void change_realloc_perc(HashTable<U>& h, double rhs, double startval);
 
  private:
-  size_t gethash(const T& str);
   void hash_realloc();
   void tree_rehash(RBTree<T>& tree, std::vector<size_t>& rem);
+  size_t gethash(const T& str) const;
 
   size_t START_HASHTABLE_SIZE = 8192;
   double ratio_to_realloc_ = 0.3;
   double val_for_realloc_ = 3.4;
   size_t size_;
   size_t counter_;
+
+ protected:
   std::set<size_t> indexes_;
   RBTree<T>* table_;
 };
