@@ -10,7 +10,7 @@ static const size_t nTests = 1e4;
 TEST(HashTableTest, CrushTest) {
   HashTable<int> first;
 
-  for(size_t i = 0; i < nTests; ++i) {
+  for (size_t i = 0; i < nTests; ++i) {
     first.addelem(i);
   }
 }
@@ -18,11 +18,11 @@ TEST(HashTableTest, CrushTest) {
 TEST(HashTableTest, CopyConstructor) {
   HashTable<int> first;
 
-  for(size_t i = 0; i < nTests; ++i) {
+  for (size_t i = 0; i < nTests; ++i) {
     first.addelem(i);
   }
 
-  HashTable<int>second(first);
+  HashTable<int> second(first);
 
   ASSERT_EQ(first.get_counter(), second.get_counter());
   ASSERT_EQ(first.get_size(), second.get_size());
@@ -31,11 +31,11 @@ TEST(HashTableTest, CopyConstructor) {
 TEST(HashTableTest, MoveConstructor) {
   HashTable<int> first;
 
-  for(size_t i = 0; i < nTests; ++i) {
+  for (size_t i = 0; i < nTests; ++i) {
     first.addelem(i);
   }
 
-  HashTable<int> second(std::move(first)); 
+  HashTable<int> second(std::move(first));
   ASSERT_EQ(first.get_counter(), 0);
   ASSERT_NE(second.get_counter(), 0);
   ASSERT_EQ(first.get_size(), 0);
@@ -46,7 +46,7 @@ TEST(HashTableTest, CopyOperator) {
   HashTable<int> first;
   HashTable<int> second;
 
-  for(size_t i = 0; i < nTests; ++i) {
+  for (size_t i = 0; i < nTests; ++i) {
     first.addelem(i);
   }
 
@@ -59,9 +59,9 @@ TEST(HashTableTest, MoveOperator) {
   HashTable<int> first;
   HashTable<int> second;
 
-  for(size_t i = 0; i < nTests; ++i) {
+  for (size_t i = 0; i < nTests; ++i) {
     first.addelem(i);
-  }  
+  }
   ASSERT_EQ(second.get_counter(), 0);
 
   second = std::move(first);
@@ -73,7 +73,7 @@ TEST(HashTableTest, EqOperator) {
   HashTable<int> second;
   int val = rand() % nTests + nTests;
 
-  for(size_t i = 0; i < nTests; ++i) {
+  for (size_t i = 0; i < nTests; ++i) {
     first.addelem(i);
     second.addelem(i);
     ASSERT_TRUE(first == second);
@@ -118,6 +118,25 @@ TEST(HashTableTest, Iselem) {
 
     ASSERT_TRUE(first.iselem(val));
   }
+}
+
+TEST(HashTableTest, GetFrequency) {
+  HashTable<int> first;
+
+  for (size_t i = 0; i < nTests; ++i) {
+    first.addelem(i);
+  }
+  for (size_t i = 0; i < nTests; ++i) {
+    ASSERT_EQ(first.getfreq(i), 1);
+  }
+
+  ASSERT_EQ(first.getfreq(nTests), 0);
+  auto val = rand() % nTests;
+  for (size_t i = 0; i < nTests; ++i) {
+    first.addelem(val);
+  }
+
+  ASSERT_EQ(first.getfreq(val), nTests + 1);
 }
 
 int main(int argc, char* argv[]) {
