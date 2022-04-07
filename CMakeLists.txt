@@ -4,6 +4,7 @@ project(myT9)
 add_subdirectory(rbtree)
 add_subdirectory(hashtable)
 add_subdirectory(Stack)
+add_subdirectory(dictionary)
 
 file(GLOB_RECURSE ALL_CXX_SOURCE_FILES *.cpp *.hpp)
 
@@ -22,3 +23,6 @@ set(CMAKE_CXX_CLANG_TIDY
     --format-style=file
     --header-filter=*.hpp
 )
+
+add_custom_target(run_every_test)
+add_dependencies(run_every_test run_redblack_test run_hashtable_test run_dictionary_test)
