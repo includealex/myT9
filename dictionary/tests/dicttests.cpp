@@ -5,7 +5,7 @@
 static const size_t nTests = 1e5;
 
 std::string randstring_gen(size_t wsize) {
-  static const char alphanum[] = "0123456789QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm";
+  static const char alphanum[] = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm";
   std::string res;
 
   res.reserve(wsize);
@@ -33,12 +33,12 @@ TEST(DictionaryTest, MostFit) {
     first.addelem(randstring_gen(wsize));
   }
 
-  auto val = "hello";
+  auto val = randstring_gen(wsize);
   for (size_t i = 0; i <= nTests; ++i) {
     first.addelem(val);
   }
 
-  std::string str = "hellod";
+  std::string str = val + "d";
   auto ans = first.find_best_word(str);
 
   ASSERT_TRUE(ans.ldist >= 0);
@@ -54,6 +54,15 @@ TEST(DictionaryTest, MostFit) {
 TEST(DictionaryTest, GetWordSize) {
   size_t wsize = rand() % nTests;
   Dictionary first(wsize);
+
+  ASSERT_EQ(first.get_wordsize(), wsize);
+}
+
+TEST(DictionaryTest, SetWordsize) {
+  Dictionary first;
+  size_t wsize = rand() % nTests;
+
+  first.set_wordsize(wsize);
 
   ASSERT_EQ(first.get_wordsize(), wsize);
 }

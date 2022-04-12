@@ -84,3 +84,7 @@ cmp_word Dictionary::find_best_word(const std::string& str) const {
 size_t Dictionary::get_wordsize() const {
   return wordsize_;
 }
+
+void Dictionary::set_wordsize(const size_t& wsize) {
+  wordsize_ = wsize;
+}
