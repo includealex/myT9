@@ -199,4 +199,21 @@ void HashTable<T, Hash>::hash_realloc() {
   size_ = newsize_;
 }
 
+template <typename T, typename Hash>
+std::vector<T> HashTable<T, Hash>::get_all_elements() const {
+  std::vector<T> res;
+
+  if(indexes_.empty())
+    return res;
+
+  for (auto i : indexes_) {
+    std::vector<T> val = table_[i].get_inorder();
+
+    for(auto n : val)
+      res.push_back(n);
+  }
+
+  return res;
+}
+
 #endif  // HASHTABLE_INCLUDES_HASH_TABLE_IMPL_HPP

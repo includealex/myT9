@@ -139,6 +139,22 @@ TEST(HashTableTest, GetFrequency) {
   ASSERT_EQ(first.getfreq(val), nTests + 1);
 }
 
+TEST(HashTableTest, GetAllElements) {
+  HashTable<int> first;
+
+  for (size_t i = 0; i < nTests; ++i) {
+    first.addelem(i);
+  }
+
+  auto res = first.get_all_elements();
+  ASSERT_EQ(res.size(), nTests);
+
+  for(size_t i = 0; i < nTests; ++i) {
+    auto val = std::find(res.begin(), res.end(), i);
+    ASSERT_EQ(*val, i);
+  }
+}
+
 int main(int argc, char* argv[]) {
   srand(time(nullptr));
   ::testing::InitGoogleTest(&argc, argv);

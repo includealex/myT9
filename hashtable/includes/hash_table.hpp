@@ -29,6 +29,8 @@ class HashTable {
   size_t get_counter() const;
   size_t get_size() const;
 
+  std::vector<T> get_all_elements() const;
+
   template <class U>
   friend void change_realloc_size(HashTable<U>& h, double rhs, double startval);
 
