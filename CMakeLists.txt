@@ -9,6 +9,8 @@ add_subdirectory(editor)
 
 file(GLOB_RECURSE ALL_CXX_SOURCE_FILES *.cpp *.hpp)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
 find_program(CLANG_FORMAT "clang-format" REQUIRED)
 
 add_custom_target (

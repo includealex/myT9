@@ -9,6 +9,7 @@ target_link_libraries(editor dictionary)
 target_include_directories(editor PUBLIC includes/)
 
 add_subdirectory(tests)
+add_subdirectory(mprog)
 
 set_target_properties (editor PROPERTIES
     CXX_STANDARD          11
