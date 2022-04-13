@@ -174,6 +174,13 @@ TEST(EditorTest, GetFitWord) {
   ASSERT_EQ(first.find_fit_word(start), start);
 }
 
+TEST(EditorTest, TeachingCrush) {
+  Editor first;
+
+  first.teach("LOR.txt");
+  first.teach("Onegin.txt");
+}
+
 int main(int argc, char* argv[]) {
   srand(time(nullptr));
   ::testing::InitGoogleTest(&argc, argv);

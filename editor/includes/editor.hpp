@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <set>
+#include <thread>
 
 class Editor {
  public:
@@ -22,7 +23,11 @@ class Editor {
   bool is_dict(const size_t& wsize) const;
   size_t total_words() const;
 
-  std::string find_fit_word(std::string& str) const;
+  void teach(const std::string& filepath);
+  void edit(const std::string& filepath);
+  void thredit(const std::string& filepath);
+
+  std::string find_fit_word(const std::string& str) const;
 
   std::vector<std::string> get_dict_words(const size_t& wsize) const;
   void print_dict_words(const size_t& wsize) const;
@@ -32,7 +37,7 @@ class Editor {
 
   void add_dict(const size_t& wsize);
   bool acceptable(const char& letter) const;
-  size_t filter_word(std::string& str) const;
+  size_t filter_word(std::string* str) const;
 };
 
 #endif //EDITOR_INCLUDES_EDITOR_HPP

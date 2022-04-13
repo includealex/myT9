@@ -1,5 +1,6 @@
 #include "editor.hpp"
 #include <algorithm>
+#include <fstream>
 
 Editor::Editor() {
   dicts_ = new std::vector<Dictionary*>;
@@ -76,7 +77,6 @@ bool Editor::operator==(const Editor& other) const {
 
     for(size_t i = 0; i < farr.size(); ++i) {
       if(farr[i] != sarr[i]) {
-        std::cout << "farr[i] = " << farr[i] << "sarr[i] = " << sarr[i] << std::endl;
         return false;
       }
     }
@@ -103,16 +103,16 @@ bool Editor::acceptable(const char& letter) const {
   return false;
 }
 
-size_t Editor::filter_word(std::string& str) const{
+size_t Editor::filter_word(std::string* str) const{
   std::string res = "";
 
-  for(auto letter : str) {
+  for(auto letter : *str) {
     if(acceptable(letter))
         res += letter;
   }
 
-  str = res;
-  return str.size();
+  *str = res;
+  return res.size();
 }
 
 bool Editor::is_dict(const size_t& wsize) const {
@@ -126,7 +126,7 @@ bool Editor::is_dict(const size_t& wsize) const {
 
 void Editor::add_word(const std::string& str) {
   auto val = str;
-  auto wordsize = filter_word(val);
+  auto wordsize = filter_word(&val);
 
   if(!wordsize)
     return;
@@ -180,8 +180,9 @@ void Editor::print_dict_words(const size_t& wsize) const {
   std::cout << std::endl;
 }
 
-std::string Editor::find_fit_word(std::string& str) const {
-  auto wsize = filter_word(str);
+std::string Editor::find_fit_word(const std::string& str) const {
+  auto nstr = str;
+  auto wsize = filter_word(&nstr);
   std::string ans = "";
 
   if(!wsize || wsize == 1)
@@ -240,4 +241,126 @@ std::string Editor::find_fit_word(std::string& str) const {
   delete[] arr;
   delete[] ds;
   return ans;
+}
+
+void Editor::teach(const std::string& filepath) {
+  std::string pth = "../../../Books/";
+  std::ifstream ifstrm(pth + filepath);
+
+  if(!ifstrm.is_open()) {
+    std::cout << "No file given" << std::endl;
+    return;
+  }
+  
+  while (!ifstrm.eof()) {
+    std::string rhs;
+    ifstrm >> rhs;
+
+    add_word(rhs);
+  }
+
+  ifstrm.close();
+}
+
+void Editor::edit(const std::string& filename) {
+  auto path = "../../../" + filename;
+  std::ifstream ifstrm(path);
+  std::vector<std::string> buf;
+
+  if(!ifstrm.is_open()) {
+    std::cout << "No file given" << std::endl;
+    return;
+  }
+
+  while(!ifstrm.eof()) {
+    std::string rhs;
+    ifstrm >> rhs;
+
+    buf.push_back(find_fit_word(rhs));    
+  }
+  ifstrm.close();
+
+  std::ofstream file(path);
+  for(auto str : buf) {
+    file << (str + " ");
+  }
+
+  file.close();
+}
+
+void Editor::thredit(const std::string& filename) {
+  size_t num = 10;
+  auto path = "../../../" + filename;
+  std::vector<std::vector<std::string>> buf(num);
+
+  std::ifstream ifstrm(path);
+  size_t counter = 0;
+
+  if(!ifstrm.is_open()) {
+    std::cout << "No file given" << std::endl;
+    return;
+  }
+
+  while(!ifstrm.eof()) {
+    std::string val;
+    ifstrm >> val;
+    ++counter;
+  }
+
+  ifstrm.close();
+
+  ifstrm.open(path);
+
+  while(!ifstrm.eof()) {
+    std::string rhs;
+    ifstrm >> rhs;
+    auto n = counter % num;
+    ++counter;
+
+    buf[n].push_back(rhs);
+  }
+
+  if(counter < num)
+    num = counter;
+
+  ifstrm.close();
+
+  auto arr = new std::thread[num];
+
+  auto foo = [&](size_t num, std::vector<std::string>& vec) { 
+    std::vector<std::string> resarr;
+
+    for(auto el : vec) {
+      auto res = find_fit_word(el);
+      resarr.push_back(res);        
+    }
+    
+    vec.erase(vec.begin());
+
+    for(auto el : resarr)
+      vec.push_back(el);
+  };
+
+  for(size_t i = 0; i < num; ++i) {
+    arr[i] = std::thread(foo, std::ref(i), std::ref(buf[i]));
+  }
+
+  for (size_t i = 0; i < num; ++i) {
+    arr[i].join();
+  }
+  
+  delete[] arr;  
+
+  std::vector<std::string> result;
+  for(auto j : buf) {
+    for(auto i : j)
+      result.push_back(i);
+  }
+
+  std::ofstream file(path);
+  for(auto str : result) {
+    file << (str + " ");
+  }
+
+  file.close();
 }
