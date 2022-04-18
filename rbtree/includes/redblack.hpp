@@ -21,7 +21,7 @@ struct NodeT {
 };
 
 template <class T>
-class RBTree {
+class RBTree final{
  public:
   RBTree();
   RBTree(const RBTree<T>& other);

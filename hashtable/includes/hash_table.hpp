@@ -15,7 +15,7 @@ class HashTable {
   HashTable();
   HashTable(const HashTable<T, Hash>& other);
   HashTable(HashTable&& other) noexcept;
-  ~HashTable();
+  virtual ~HashTable();
 
   HashTable<T, Hash>& operator=(const HashTable<T, Hash>& other);
   HashTable<T, Hash>& operator=(HashTable<T, Hash>&& other) noexcept;
