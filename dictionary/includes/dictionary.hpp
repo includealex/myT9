@@ -11,7 +11,7 @@ struct cmp_word {
   std::string str;
 };
 
-class Dictionary : public HashTable<std::string> {
+class Dictionary final : public HashTable<std::string> {
  public:
   explicit Dictionary(size_t wsize = 0);
   cmp_word find_best_word(const std::string& str) const;
