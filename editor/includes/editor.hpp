@@ -7,7 +7,7 @@
 #include <set>
 #include <thread>
 
-class Editor {
+class Editor final{
  public:
   Editor();
   Editor(const Editor& other);
