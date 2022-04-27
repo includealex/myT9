@@ -289,12 +289,12 @@ void Editor::edit(const std::string& filename) {
 }
 
 void Editor::thredit(const std::string& filename) {
-  size_t num = 10;
   auto path = "../../../" + filename;
-  std::vector<std::vector<std::string>> buf(num);
+  size_t nthreads = 5;
 
+  std::vector<std::string> readen;
+  std::vector<std::string> written;
   std::ifstream ifstrm(path);
-  size_t counter = 0;
 
   if(!ifstrm.is_open()) {
     std::cout << "No file given" << std::endl;
@@ -304,61 +304,33 @@ void Editor::thredit(const std::string& filename) {
   while(!ifstrm.eof()) {
     std::string val;
     ifstrm >> val;
-    ++counter;
-  }
 
+    readen.push_back(val);
+    written.push_back("");
+  }
   ifstrm.close();
 
-  ifstrm.open(path);
+  size_t nwords = readen.size();
 
-  while(!ifstrm.eof()) {
-    std::string rhs;
-    ifstrm >> rhs;
-    auto n = counter % num;
-    ++counter;
-
-    buf[n].push_back(rhs);
-  }
-
-  if(counter < num)
-    num = counter;
-
-  ifstrm.close();
-
-  auto arr = new std::thread[num];
-
-  auto foo = [&](size_t num, std::vector<std::string>& vec) { 
-    std::vector<std::string> resarr;
-
-    for(auto el : vec) {
-      auto res = find_fit_word(el);
-      resarr.push_back(res);        
+  auto threadfoo = [&](size_t i) {
+    while(i < nwords) {
+      written[i] = find_fit_word(readen[i]);
+      i += nthreads; 
     }
-    
-    vec.erase(vec.begin());
-
-    for(auto el : resarr)
-      vec.push_back(el);
   };
 
-  for(size_t i = 0; i < num; ++i) {
-    arr[i] = std::thread(foo, std::ref(i), std::ref(buf[i]));
+  auto arr = new std::thread[nthreads];
+  for(size_t i = 0; i < nthreads; ++i) {
+    arr[i] = std::thread(threadfoo, i);
   }
 
-  for (size_t i = 0; i < num; ++i) {
+  for (size_t i = 0; i < nthreads; ++i) {
     arr[i].join();
-  }
-  
+  }  
   delete[] arr;  
 
-  std::vector<std::string> result;
-  for(auto j : buf) {
-    for(auto i : j)
-      result.push_back(i);
-  }
-
   std::ofstream file(path);
-  for(auto str : result) {
+  for(auto str : written) {
     file << (str + " ");
   }
 
