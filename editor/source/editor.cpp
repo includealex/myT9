@@ -6,6 +6,11 @@ Editor::Editor() {
   dicts_ = new std::vector<Dictionary*>;
 }
 
+Editor::Editor(size_t nofthreads) {
+  dicts_ = new std::vector<Dictionary*>;
+  nthreads_ = nofthreads;
+}
+
 Editor::Editor(const Editor& other) {
   dicts_ = new std::vector<Dictionary*>;
 
@@ -290,7 +295,6 @@ void Editor::edit(const std::string& filename) {
 
 void Editor::thredit(const std::string& filename) {
   auto path = "../../../" + filename;
-  size_t nthreads = 5;
 
   std::vector<std::string> readen;
   std::vector<std::string> written;
@@ -315,16 +319,16 @@ void Editor::thredit(const std::string& filename) {
   auto threadfoo = [&](size_t i) {
     while(i < nwords) {
       written[i] = find_fit_word(readen[i]);
-      i += nthreads; 
+      i += nthreads_; 
     }
   };
 
-  auto arr = new std::thread[nthreads];
-  for(size_t i = 0; i < nthreads; ++i) {
+  auto arr = new std::thread[nthreads_];
+  for(size_t i = 0; i < nthreads_; ++i) {
     arr[i] = std::thread(threadfoo, i);
   }
 
-  for (size_t i = 0; i < nthreads; ++i) {
+  for (size_t i = 0; i < nthreads_; ++i) {
     arr[i].join();
   }  
   delete[] arr;  
@@ -335,4 +339,8 @@ void Editor::thredit(const std::string& filename) {
   }
 
   file.close();
+}
+
+void Editor::setnumofthread(const size_t nofthreads) {
+  nthreads_ = nofthreads;
 }
