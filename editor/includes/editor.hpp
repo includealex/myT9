@@ -10,6 +10,7 @@
 class Editor final{
  public:
   Editor();
+  Editor(const size_t nofthreads);
   Editor(const Editor& other);
   Editor(Editor&& other) noexcept;
   ~Editor();
@@ -25,6 +26,7 @@ class Editor final{
 
   void teach(const std::string& filepath);
   void edit(const std::string& filepath);
+  void setnumofthread(const size_t nofthreads);
   void thredit(const std::string& filepath);
 
   std::string find_fit_word(const std::string& str) const;
@@ -33,6 +35,7 @@ class Editor final{
   void print_dict_words(const size_t& wsize) const;
 
  private:
+  size_t nthreads_ = 5;
   std::vector<Dictionary*>* dicts_;
 
   void add_dict(const size_t& wsize);
