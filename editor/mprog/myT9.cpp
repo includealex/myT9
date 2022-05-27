@@ -21,7 +21,7 @@ int main() {
         auto duration = duration_cast<milliseconds>(stop - start);
         fout << duration.count() << std::endl;
 
-        n += 10;
+        ++n;
     }
     fout.close();
 
